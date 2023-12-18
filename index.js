@@ -3,7 +3,11 @@ const app = express();
 import './src/config/db.js'
 import userRouter from './src/routes/userRoute.js';
 app.use(express.json());
-app.use('/api/v1',userRouter)
+app.use('/api/v1',userRouter);
+
+app.get('/', function(req, res){
+    res.send("welcome");
+})
 
 const port = 5000;
 app.listen(port, () => {
