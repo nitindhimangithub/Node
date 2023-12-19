@@ -2,6 +2,8 @@ import jwt from "jsonwebtoken";
 import envconfig from "../config/envConfig.js";
 // const SECRET_KEY = "NOTESAPI";
 
+
+
 function verifyToken(req, res, next) {
   try {
     let token = req.headers.authorization;

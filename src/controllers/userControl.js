@@ -5,6 +5,7 @@ import { validateEmail, validatePassword, validateFullName } from "../validate/v
 // const SECRET_KEY="NOTESAPI"
 import envconfig from "../config/envConfig.js";
 import transporter from "../middleware/emailConfig.js";
+import { verifyToken } from "../middleware/verifyToken.js";
 
 const userRegister = async (req, res) => {
   try {
@@ -61,7 +62,7 @@ const Login = async (req, res) => {
     }
     const token = jwt.sign({ userId: existingUser._id, email: existingUser.email }, envconfig.SECRET_KEY)
 
-    const userData = token;
+    const userData = {token:token};
     return res.status(200).json({ message: "login succesfully", userData });
 
   } catch (error) {
@@ -146,27 +147,49 @@ const deleteUser = async (req, res) => {
 // }
 
 
+// const getUserId = async (req, res) => {
+//   try {
+//       const token = req.header('Authorization')?.split(' ')[1]
+//       if (!token) {
+//           return res.status(401).json({ message: 'token is missing' });
+//       }
+//       const decode = jwt.verify(token, envconfig.SECRET_KEY);
+//       const getUser = await User.findById(decode.userId)
+//       if (!decode.userId) {
+//           return res.status(404).json({ message: 'id is missing in payload' });
+//       }
+//       if (!getUser) {
+//           return res.status(500).json({ message: 'user not find' })
+//       } else {
+//           return res.status(201).json({ message: 'user find successfully', getUser });
+//       }
+//   } catch (error) {
+//       console.error("Error in finding user")
+//       return res.status(500).json({ message: 'error in finding user' ,error });
+//   }
+// }
 const getUserId = async (req, res) => {
   try {
-      const token = req.header('Authorization')?.split(' ')[1]
-      if (!token) {
-          return res.status(401).json({ message: 'token is missing' });
+    verifyToken(req, res, async () => {
+      const { userId } = req.user; 
+      
+      if (!userId) {
+        return res.status(404).json({ message: 'ID is missing in payload' });
       }
-      const decode = jwt.verify(token, envconfig.SECRET_KEY);
-      const getUser = await User.findById(decode.userId)
-      if (!decode.userId) {
-          return res.status(404).json({ message: 'id is missing in payload' });
-      }
+      
+      const getUser = await User.findById(userId);
+      
       if (!getUser) {
-          return res.status(500).json({ message: 'user not find' })
+        return res.status(404).json({ message: 'User not found' });
       } else {
-          return res.status(201).json({ message: 'user find successfully', getUser });
+        return res.status(200).json({ message: 'User found successfully', getUser });
       }
+    });
   } catch (error) {
-      console.error("Error in finding user")
-      return res.status(500).json({ message: 'error in finding user' ,error });
+    console.error("Error in finding user:", error);
+    return res.status(500).json({ message: 'Error in finding user', error });
   }
-}
+};
 
 
 let updateUserById = async (req, res, next) => {

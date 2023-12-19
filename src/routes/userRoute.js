@@ -6,7 +6,7 @@ router.post('/register', userRegister);
 router.post('/login',Login );
 router.get('/getAllUsers', verifyToken,getAllUser);
 router.delete('/deleteUsers/:id',deleteUser);
-router.get('/getUsers', getUserId);
+router.get('/getUsers',verifyToken, getUserId);
 router.put('/updateUsers/:id',updateUserById);
 router.post('/send-email',sendEmail);
 router.post('/reset-password',resetPassword);
